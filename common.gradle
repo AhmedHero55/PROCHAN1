@@ -1,64 +1,30 @@
-apply plugin: 'org.jmailen.kotlinter'
+// common.gradle
+apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-kapt'
 
+// إعدادات Android
 android {
-    compileSdkVersion AndroidConfig.compileSdk
+    compileSdkVersion 34
 
-    namespace "eu.kanade.tachiyomi.extension"
+    defaultConfig {
+        minSdkVersion 21
+        targetSdkVersion 34
+    }
+
     sourceSets {
         main {
-            manifest.srcFile "AndroidManifest.xml"
+            manifest.srcFile 'src/main/AndroidManifest.xml'
             java.srcDirs = ['src']
             res.srcDirs = ['res']
             assets.srcDirs = ['assets']
-        }
-        release {
-            manifest.srcFile "AndroidManifest.xml"
-        }
-        debug {
-            manifest.srcFile "AndroidManifest.xml"
-        }
-    }
-
-    defaultConfig {
-        minSdkVersion AndroidConfig.minSdk
-        targetSdkVersion AndroidConfig.targetSdk
-        applicationIdSuffix pkgNameSuffix
-        versionCode extVersionCode
-        versionName project.ext.properties.getOrDefault("libVersion", "1.4") + ".$extVersionCode"
-        setProperty("archivesBaseName", "tachiyomi-$pkgNameSuffix-v$versionName")
-        manifestPlaceholders = [
-                appName : "Tachiyomi: $extName",
-                extClass: extClass,
-                nsfw: project.ext.properties.getOrDefault("isNsfw", false) ? 1 : 0,
-        ]
-    }
-
-    signingConfigs {
-        release {
-            storeFile rootProject.file("signingkey.jks")
-            storePassword System.getenv("KEY_STORE_PASSWORD")
-            keyAlias System.getenv("ALIAS")
-            keyPassword System.getenv("KEY_PASSWORD")
         }
     }
 
     buildTypes {
         release {
-            signingConfig signingConfigs.release
             minifyEnabled false
         }
-    }
-
-    dependenciesInfo {
-        includeInApk = false
-    }
-
-    buildFeatures {
-        // Disable unused AGP features
-        aidl false
-        renderScript false
-        resValues false
-        shaders false
     }
 
     compileOptions {
@@ -67,29 +33,18 @@ android {
     }
 
     kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_1_8.toString()
-        freeCompilerArgs += "-opt-in=kotlinx.serialization.ExperimentalSerializationApi"
-    }
-
-    kotlinter {
-        experimentalRules = true
-        disabledRules = [
-            "experimental:argument-list-wrapping", // Doesn't play well with Android Studio
-            "experimental:comment-wrapping",
-        ]
+        jvmTarget = '1.8'
     }
 }
 
+// مستودعات dependencies
 repositories {
     mavenCentral()
 }
 
+// إضافات أساسية للـ dependencies
 dependencies {
-    implementation(project(":core"))
-    compileOnly(libs.bundles.common)
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:1.9.0"
+    implementation "com.squareup.okhttp3:okhttp:4.11.0"
+    implementation "org.jsoup:jsoup:1.16.1"
 }
-
-preBuild.dependsOn(lintKotlin)
-lintKotlin.dependsOn(formatKotlin)
-
-
