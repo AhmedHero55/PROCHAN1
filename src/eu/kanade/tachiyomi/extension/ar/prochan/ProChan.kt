@@ -19,6 +19,8 @@ import okhttp3.Request
 import okhttp3.Response
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
+import java.text.SimpleDateFormat
+import java.util.Locale
 import java.util.concurrent.TimeUnit
 
 class ProChan : ParsedHttpSource(), ConfigurableSource {
@@ -39,10 +41,7 @@ class ProChan : ParsedHttpSource(), ConfigurableSource {
 
     // Popular
     override fun popularMangaRequest(page: Int): Request {
-        val url = when {
-            page <= 1 -> "$baseUrl/series"
-            else -> "$baseUrl/series?page=$page"
-        }
+        val url = if (page <= 1) "$baseUrl/series" else "$baseUrl/series?page=$page"
         return GET(url, headers)
     }
 
@@ -60,10 +59,7 @@ class ProChan : ParsedHttpSource(), ConfigurableSource {
 
     // Latest
     override fun latestUpdatesRequest(page: Int): Request {
-        val url = when {
-            page <= 1 -> "$baseUrl/updates"
-            else -> "$baseUrl/updates?page=$page"
-        }
+        val url = if (page <= 1) "$baseUrl/updates" else "$baseUrl/updates?page=$page"
         return GET(url, headers)
     }
 
@@ -95,4 +91,70 @@ class ProChan : ParsedHttpSource(), ConfigurableSource {
         }
     }
 
-    override fun searchMa
+    override fun searchMangaNextPageSelector(): String? = null
+
+    // Details
+    override fun mangaDetailsParse(document: Document): SManga {
+        return SManga.create().apply {
+            title = document.select("h1.series-title").text()
+            description = document.select("div.series-description").text()
+            genre = document.select("div.series-genres a").joinToString { it.text() }
+            thumbnail_url = document.select("img.series-cover").first()!!.absUrl("src")
+            status = SManga.UNKNOWN // يمكنك تعديلها حسب الموقع إذا احتجت
+            author = document.select("div.series-author").text()
+        }
+    }
+
+    // Chapters
+    override fun chapterListParse(response: Response): List<SChapter> {
+        val document = response.asJsoup()
+        return document.select("div.chapter-list div.chapter-card").map { chapterFromElement(it) }
+    }
+
+    override fun chapterFromElement(element: Element): SChapter {
+        return SChapter.create().apply {
+            name = element.select("div.chapter-title").text()
+            setUrlWithoutDomain(element.select("a").first()!!.attr("href"))
+            date_upload = 0 // يمكنك إضافة parsing لتاريخ الفصل إذا أردت
+        }
+    }
+
+    // Pages
+    override fun pageListParse(document: Document): List<Page> {
+        return document.select("div.page-list img").mapIndexed { i, element ->
+            Page(i, "", element.absUrl("src"))
+        }
+    }
+
+    override fun imageUrlParse(document: Document): String = throw UnsupportedOperationException("Not used")
+
+    // Preferences
+    override fun setupPreferenceScreen(screen: PreferenceScreen) {
+        val baseUrlPref = androidx.preference.EditTextPreference(screen.context).apply {
+            key = "overrideBaseUrl"
+            title = "تعديل الرابط"
+            summary = "لتغيير الرابط الأساسي مؤقتًا"
+            setDefaultValue(defaultBaseUrl)
+            dialogTitle = "تعديل الرابط"
+            dialogMessage = "Default: $defaultBaseUrl"
+            setOnPreferenceChangeListener { _, _ ->
+                Toast.makeText(screen.context, "أعد تشغيل التطبيق لتطبيق التغييرات", Toast.LENGTH_LONG).show()
+                true
+            }
+        }
+        screen.addPreference(baseUrlPref)
+    }
+
+    private fun getPrefBaseUrl(): String = preferences.getString("overrideBaseUrl", defaultBaseUrl)!!
+
+    init {
+        preferences.getString("defaultBaseUrl", null)?.let { prefDefaultBaseUrl ->
+            if (prefDefaultBaseUrl != defaultBaseUrl) {
+                preferences.edit()
+                    .putString("overrideBaseUrl", defaultBaseUrl)
+                    .putString("defaultBaseUrl", defaultBaseUrl)
+                    .apply()
+            }
+        }
+    }
+}
