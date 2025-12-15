@@ -1,4 +1,16 @@
 // common.gradle
+
+buildscript {
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        classpath "com.android.tools.build:gradle:8.3.1" // نسخة حديثة متوافقة مع Gradle 9.x
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.9.0"
+    }
+}
+
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-kapt'
@@ -39,6 +51,7 @@ android {
 
 // مستودعات dependencies
 repositories {
+    google()
     mavenCentral()
 }
 
