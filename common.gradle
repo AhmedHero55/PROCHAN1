@@ -1,3 +1,4 @@
+// Shared Gradle configuration
 apply plugin: 'kotlin'
 
 android {
