@@ -1,46 +1,38 @@
-apply plugin: "com.android.library"
-apply plugin: "kotlin-android"
+apply plugin: 'kotlin'
 
 android {
-    namespace "eu.kanade.tachiyomi.extension.ar.prochan"
-
-    compileSdk 34
-
+    compileSdkVersion 34
     defaultConfig {
-        minSdk 21
-        targetSdk 34
-        versionCode project.ext.extVersionCode
-        versionName "1.$versionCode"
+        minSdkVersion 21
+        targetSdkVersion 34
+        versionCode 1
+        versionName "1.0"
     }
-
-    sourceSets {
-        main {
-            manifest.srcFile "AndroidManifest.xml"
-            java.srcDirs = ["src"]
-            res.srcDirs = ["res"]
-            assets.srcDirs = ["assets"]
-        }
-    }
-
-    buildTypes {
-        debug { minifyEnabled false }
-        release { minifyEnabled false }
-    }
-
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
     }
-
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = "17"
     }
+}
+
+repositories {
+    google()
+    mavenCentral()
+    maven { url "https://jitpack.io" }
 }
 
 dependencies {
-    compileOnly "tachiyomi.sourceapi:source-api:1.1"
-    implementation "org.jetbrains.kotlin:kotlin-stdlib:1.9.22"
-    implementation "org.jsoup:jsoup:1.17.2"
-    implementation "com.squareup.okhttp3:okhttp:4.12.0"
-}
+    // Tachiyomi Source API
+    compileOnly "dev.tachiyomi:source-api:1.1"
 
+    // Kotlin standard library
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:1.9.22"
+
+    // OkHttp for networking
+    implementation "com.squareup.okhttp3:okhttp:4.12.0"
+
+    // Jsoup for HTML parsing
+    implementation "org.jsoup:jsoup:1.17.2"
+}
