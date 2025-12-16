@@ -38,8 +38,7 @@ android {
 }
 
 dependencies {
-    compileOnly "dev.tachiyomi:source-api:1.1.1"
-
+    compileOnly "tachiyomi.sourceapi:source-api:1.1"
     implementation "org.jetbrains.kotlin:kotlin-stdlib:1.9.22"
     implementation "org.jsoup:jsoup:1.17.2"
     implementation "com.squareup.okhttp3:okhttp:4.12.0"
