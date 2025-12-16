@@ -1,27 +1,44 @@
-plugins {
-    id 'com.android.library'
-    id 'org.jetbrains.kotlin.android'
+buildscript {
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        classpath "com.android.tools.build:gradle:8.3.2"
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.9.22"
+    }
 }
 
+apply plugin: "com.android.library"
+apply plugin: "kotlin-android"
+
+// Android config
 android {
+    namespace "eu.kanade.tachiyomi.extension.ar.prochan"
+
     compileSdk 34
 
     defaultConfig {
         minSdk 21
         targetSdk 34
+        versionCode project.ext.extVersionCode ?: 1
+        versionName "1.${versionCode}"
     }
 
     sourceSets {
         main {
-            manifest.srcFile 'AndroidManifest.xml'
-            java.srcDirs = ['src']
-            res.srcDirs = ['res']
-            assets.srcDirs = ['assets']
+            manifest.srcFile "AndroidManifest.xml"
+            java.srcDirs = ["src"]
+            res.srcDirs = ["res"]
+            assets.srcDirs = ["assets"]
         }
     }
 
     buildTypes {
         release {
+            minifyEnabled false
+        }
+        debug {
             minifyEnabled false
         }
     }
@@ -32,8 +49,13 @@ android {
     }
 
     kotlinOptions {
-        jvmTarget = '1.8'
+        jvmTarget = "1.8"
     }
+}
+
+repositories {
+    google()
+    mavenCentral()
 }
 
 dependencies {
